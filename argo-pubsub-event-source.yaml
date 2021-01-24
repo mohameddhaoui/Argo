@@ -1,0 +1,47 @@
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: gcp-pubsub-event
+spec:
+  template:
+     serviceAccountName: argo-events-ksa
+  pubSub:
+    pubsubevent:
+      # (optional) jsonBody specifies that all event body payload coming from this
+      # source will be JSON
+      jsonBody: true
+      # (optional) GCP project ID for the subscription.
+      # Required if you run Argo Events outside of GKE/GCE.
+      # (otherwise, the default value is its project)
+      projectID: <project_id>
+      # (optional) GCP project ID for the topic.
+      # By default, it is same as ProjectID.
+      # topicProjectID: "project-id"
+      # (optional) Topic to which the subscription should belongs.
+      # Required if you want the eventsource to create a new subscription.
+      # If you specify this field along with an existing subscription,
+      # it will be verified whether it actually belongs to the specified topic.
+      topic: <argo-events-topic>
+      # (optional) ID of subscription.
+      # Required if you use existing subscription.
+      # The default value will be auto generated hash based on this eventsource setting, so the subscription
+      # might be recreated every time you update the setting, which has a possibility of event loss.
+      subscriptionID: <argo-pubsub-subscription>
+      # (optional) Refers to a k8s secret which contains the credential JSON to access pubsub.
+      # If it is missing, it implicitly uses Workload Identity.
+      # Deprecated, legacy approach
+      # credentialsFile: ""
+
+
+#    example-workload-identity:
+#      # jsonBody specifies that all event body payload coming from this
+#      # source will be JSON
+#      jsonBody: true
+#      # id of your project
+#      projectID: argo-events-XXXXX
+#      # (optional) id of project for topic, same as projectID by default
+#      # topicProjectID: "project-id"
+#      # topic name
+#      topic: test
+#      # Empty credentials file when using Workflow Identity
+#      credentialsFile: ""

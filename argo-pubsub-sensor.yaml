@@ -1,0 +1,41 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: argo-job
+spec:
+  template:
+    serviceAccountName: argo-events-ksa
+  dependencies:
+    - name: pubsub-dep
+      eventSourceName: gcp-pubsub-event
+      eventName: pubsubevent
+  triggers:
+    - template:
+        name: pubsub-job-trigger
+        k8s:
+          group: "batch"
+          version: v1
+          resource: jobs
+          operation: create
+          source:
+            resource:
+              apiVersion: batch/v1
+              kind: Job
+              metadata:
+                generateName: argo-hello-job
+              spec:
+                template:
+                  spec:
+                    restartPolicy: Never
+                    serviceAccountName: argo-events-ksa
+                    containers:
+                      - name: hello-container
+                        args:
+                          - "Hello! it's a job triggered by an argo pubsub event"
+                        command:
+                          - cowsay
+                        image: "docker/whalesay:latest"
+          parameters:
+            - src:
+                dependencyName: test-dep
+              dest: spec.containers.0.args.0
